@@ -1,0 +1,98 @@
+import java.math.BigDecimal
+import java.util.Date
+
+declarations {
+    category USER indexed by Long
+
+    event userLogin() = {
+        system controlflow trigger "LoginHandler.successfulLogin(User u)"
+    }
+
+    event userLogout() = {
+        system controlflow trigger "LoginHandler.successfulLogout(User u)"
+    }
+
+    event normalUserLogin() = {
+        system controlflow trigger "LoginHandler.successfulLogout(User u)"
+        when {{ !u.isGoldUser() }}
+    }
+
+    event normalUserLogout() = {
+        system controlflow trigger "LoginHandler.successfulLogout(User u)"
+        when {{ !u.isGoldUser() }}
+    }
+
+    event goldUserLogin() = {
+        system controlflow trigger "LoginHandler.successfulLogout(User u)"
+        when {{ u.isGoldUser() }}
+    }
+
+    event goldUserLogout() = {
+        system controlflow trigger "LoginHandler.successfulLogout(User u)"
+        when {{ u.isGoldUser() }}
+    }
+
+    event transferSubmitted(Long userId, BigDecimal amount) = {
+        system controlflow trigger "TransactionHandler.submitTransfer(User u, String toAccount, BigDecimal amount)"
+        where userId = {{ u.getId() }}
+        belonging to USER with index {{ u.getId() }}
+
+    }
+
+    event shutdown() = {
+        system controlflow trigger "SystemHandler.shutdown()"
+    }
+
+    action createAlarm(String message) = {
+        AlarmHelper.generateAlarm(message);
+    }
+}
+
+shutdown() -> { #createAlarm("System being shutdown"); }
+
+state {
+    Integer users = {{ 0 }}
+    Integer normal = {{ 0 }}
+    Integer gold = {{ 0 }}
+}
+in {
+    //rules to increment counters on login
+    userLogin() -> { users++; }
+    normalUserLogin() -> { normal++; }
+    goldUserLogin() -> { gold++; }
+
+    //rules to decrement counters on logout
+    userLogout() -> { users--; }
+    normalUserLogout() -> { normal--; }
+    goldUserLogout() -> { gold--; }
+    //rules to trigger alarms
+    userLogin() | { return (users > 110) } -> { }
+    normalUserLogin() | {{normal > 10}} -> {createAlarmAlarm("Too many normal users");}
+    goldUserLogin(u) | {{gold > 100}} -> { createAlarmAlarm("Too many gold users");}
+
+    replicate {
+        Date lastTxDate = {{ null }}
+        BigDecimal dayTx = {{ BigDecimal.ZERO }}
+        BigDecimal limit = {{ new BigDecimal("100000") }}
+    }
+    foreach USER u {
+        transferSubmitted(userId, amount) ->
+        {
+            Date today = new Date();
+
+            if((lastTxDate == null) || (!DateUtils.truncatedEqualsTo(today, lastTxDate, Calendar.DATE))
+            ) {
+                lastTxDate = today;
+                dayTx = BigDecimal.ZERO;
+            }
+
+            dayTx = dayTx.add(amount);
+
+            if(dayTx.compareTo(limit) > 0) {
+                String msg = "User " + userId + " exceeded transfer limit";
+                createAlarm(msg);
+            }
+        }
+    }
+
+}
