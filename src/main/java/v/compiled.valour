@@ -1,0 +1,182 @@
+import java.math.BigDecimal
+import java.util.Date
+declarations {
+category USER indexed by java.lang.Long
+event userLogin () = {
+system controlflow trigger "LoginHandler.successfulLogin(User u)"
+}
+event userLogout () = {
+system controlflow trigger "LoginHandler.successfulLogout(User u)"
+}
+event normalUserLogin () = {
+system controlflow trigger "LoginHandler.successfulLogout(User u)"
+when {{
+ !u.isGoldUser()
+}}
+
+}
+event normalUserLogout () = {
+system controlflow trigger "LoginHandler.successfulLogout(User u)"
+when {{
+ !u.isGoldUser()
+}}
+
+}
+event goldUserLogin () = {
+system controlflow trigger "LoginHandler.successfulLogout(User u)"
+when {{
+ u.isGoldUser()
+}}
+
+}
+event goldUserLogout () = {
+system controlflow trigger "LoginHandler.successfulLogout(User u)"
+when {{
+ u.isGoldUser()
+}}
+
+}
+event transferSubmitted (java.lang.Long userId, java.math.BigDecimal amount) = {
+system controlflow trigger "TransactionHandler.submitTransfer(User u, String toAccount, BigDecimal amount)"
+where userId = {{
+ u.getId()
+}}
+
+belonging to USER with index {{
+ u.getId()
+}}
+
+}
+event shutdown () = {
+system controlflow trigger "SystemHandler.shutdown()"
+}
+action createAlarm (java.lang.String message) = {
+
+        AlarmHelper.generateAlarm(message)
+}
+
+condition c (java.lang.Long a, java.lang.Long b) = {{
+a == b
+}}
+
+event a (java.lang.Integer i) = {
+system controlflow trigger "X"
+where i = {{
+10
+}}
+
+
+	|| system controlflow trigger "Y"
+where i = {{
+11
+}}
+
+when {{
+ u.isGoldUser()
+}}
+
+}
+}
+
+shutdown()  -> {
+ #createAlarm("System being shutdown")
+}
+
+state {
+java.lang.Integer users = {{
+ 0
+}}
+
+java.lang.Integer normal = {{
+ 0
+}}
+
+java.lang.Integer gold = {{
+ 0
+}}
+
+} in {
+userLogin()  -> {
+ users++
+}
+
+normalUserLogin()  -> {
+ normal++
+}
+
+goldUserLogin()  -> {
+ gold++
+}
+
+userLogout()  -> {
+ users--
+}
+
+normalUserLogout()  -> {
+ normal--
+}
+
+goldUserLogout()  -> {
+ gold--
+}
+
+userLogin()  | {
+ return (users > 110)
+}
+ -> {
+ createAlarm("Too many users")
+}
+
+normalUserLogin()  | {{
+normal > 10
+}}
+ -> {
+createAlarm("Too many normal users")
+}
+
+goldUserLogin(u)  | {{
+gold > 100
+}}
+ -> {
+ createAlarm("Too many gold users")
+}
+
+replicate {
+java.util.Date lastTxDate = {{
+ null
+}}
+
+java.math.BigDecimal dayTx = {{
+ BigDecimal.ZERO
+}}
+
+java.math.BigDecimal limit = {{
+ new BigDecimal("100000")
+}}
+
+} foreach USER u{
+transferSubmitted(userId, amount)  -> {
+
+            Date
+ today = new Date()
+
+
+            if((lastTxDate == null) || (!DateUtils.truncatedEqualsTo(today, lastTxDate, Calendar.DATE))
+            ) {
+                lastTxDate = today;
+                dayTx = BigDecimal.ZERO;
+            }
+
+
+            dayTx = dayTx.add(amount)
+
+
+            if(dayTx.compareTo(limit) > 0) {
+                String msg = "User " + userId + " exceeded transfer limit";
+                createAlarm(msg);
+            }
+}
+
+}
+
+}

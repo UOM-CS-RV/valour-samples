@@ -36,15 +36,21 @@ declarations {
         system controlflow trigger "TransactionHandler.submitTransfer(User u, String toAccount, BigDecimal amount)"
         where userId = {{ u.getId() }}
         belonging to USER with index {{ u.getId() }}
-
     }
-
+   
     event shutdown() = {
         system controlflow trigger "SystemHandler.shutdown()"
     }
 
     action createAlarm(String message) = {
         AlarmHelper.generateAlarm(message);
+    }
+    
+    condition c(Long a, Long b) = {{a == b}}
+    event a(Integer i) = {
+        system controlflow trigger "X" where i = {{10}} 
+       		|| system controlflow trigger "Y" where i = {{11}}
+        when {{ u.isGoldUser() }}
     }
 }
 
@@ -66,9 +72,9 @@ in {
     normalUserLogout() -> { normal--; }
     goldUserLogout() -> { gold--; }
     //rules to trigger alarms
-    userLogin() | { return (users > 110) } -> { }
-    normalUserLogin() | {{normal > 10}} -> {createAlarmAlarm("Too many normal users");}
-    goldUserLogin(u) | {{gold > 100}} -> { createAlarmAlarm("Too many gold users");}
+    userLogin() | { return (users > 110) } -> { createAlarm("Too many users"); }
+    normalUserLogin() | {{normal > 10}} -> {createAlarm("Too many normal users");}
+    goldUserLogin(u) | {{gold > 100}} -> { createAlarm("Too many gold users");}
 
     replicate {
         Date lastTxDate = {{ null }}
