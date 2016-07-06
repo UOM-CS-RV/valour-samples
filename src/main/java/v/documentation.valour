@@ -1,10 +1,13 @@
 import java.math.BigDecimal
-import java.util.Date
-
-declarations {
+import java.util.Date import java.util.UUID
+import v.AlarmHelper
+ 
+declarations {         
     category USER indexed by Long
-
-    event userLogin() = {
+    category TRANSACTION indexed by String
+    category SESSION indexed by UUID
+  
+    event userLogin() = {  
         system controlflow trigger "LoginHandler.successfulLogin(User u)"
     }
 
@@ -17,7 +20,7 @@ declarations {
         when {{ !u.isGoldUser() }}
     }
 
-    event normalUserLogout() = {
+    event normalUserLogout() = {  
         system controlflow trigger "LoginHandler.successfulLogout(User u)"
         when {{ !u.isGoldUser() }}
     }
@@ -26,7 +29,7 @@ declarations {
         system controlflow trigger "LoginHandler.successfulLogout(User u)"
         when {{ u.isGoldUser() }}
     }
-
+  
     event goldUserLogout() = {
         system controlflow trigger "LoginHandler.successfulLogout(User u)"
         when {{ u.isGoldUser() }}
