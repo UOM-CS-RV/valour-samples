@@ -5,13 +5,13 @@
 	<groupId>valour</groupId>
 	<artifactId>valour.samples</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	
+
 	<properties>
 		<xtext-version>2.9.2</xtext-version>
 		<java.version>1.8</java.version>
 	</properties>
-	
-		<dependencies>
+
+	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -22,21 +22,62 @@
 			<artifactId>org.eclipse.xtend.lib</artifactId>
 			<version>${xtext-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>valour</groupId>
+			<artifactId>valour</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>mt.edu.um.cs.rv</groupId>
+			<artifactId>events</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>mt.edu.um.cs.rv</groupId>
+			<artifactId>event-manager</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>mt.edu.um.cs.rv</groupId>
+			<artifactId>monitors</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot</artifactId>
+        <version>1.3.1.RELEASE</version>
+      </dependency>
+      
+      <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-autoconfigure</artifactId>
+    <version>1.3.1.RELEASE</version>
+</dependency>
+
+<!-- <dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-context</artifactId>
+	<version>4.2.4.RELEASE</version>
+</dependency> -->
 	</dependencies>
-	
-	
+
+
 	<build>
 		<plugins>
-			
-				<plugin>
-                   <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
-                    </configuration>
-                </plugin>
-			
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -127,43 +168,14 @@
 		</plugins>
 	</build>
 </project>
-	
-	<!-- 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.xtext</groupId>
-				<artifactId>xtext-maven-plugin</artifactId>
-				<version>2.9.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<languages>
-						Add additional standalone setups if you have more than one language
-						<language>
-							<setup>mt.edu.um.cs.rv.ValourStandaloneSetup</setup>
-							<outputConfigurations>
-								<outputConfiguration>
-									<outputDirectory>src/main/generated-sources/valour/</outputDirectory>
-								</outputConfiguration>
-							</outputConfigurations>
-						</language>
-					</languages>
-				</configuration>
-				<dependencies>
-					add a dependency to the language core bundle, this will only be needed during generation and will not pollute your project's classpath.
-					<dependency>
-						<groupId>valour</groupId>
-						<artifactId>valour</artifactId>
-						<version>1.0.0-SNAPSHOT</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-		</plugins>
-	</build>
-</project>-->
+
+<!-- <build> <plugins> <plugin> <groupId>org.eclipse.xtext</groupId> <artifactId>xtext-maven-plugin</artifactId> 
+	<version>2.9.1</version> <executions> <execution> <goals> <goal>generate</goal> 
+	</goals> </execution> </executions> <configuration> <languages> Add additional 
+	standalone setups if you have more than one language <language> <setup>mt.edu.um.cs.rv.ValourStandaloneSetup</setup> 
+	<outputConfigurations> <outputConfiguration> <outputDirectory>src/main/generated-sources/valour/</outputDirectory> 
+	</outputConfiguration> </outputConfigurations> </language> </languages> </configuration> 
+	<dependencies> add a dependency to the language core bundle, this will only 
+	be needed during generation and will not pollute your project's classpath. 
+	<dependency> <groupId>valour</groupId> <artifactId>valour</artifactId> <version>1.0.0-SNAPSHOT</version> 
+	</dependency> </dependencies> </plugin> </plugins> </build> </project> -->
